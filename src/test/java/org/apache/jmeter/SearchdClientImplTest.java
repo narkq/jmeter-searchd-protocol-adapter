@@ -20,14 +20,14 @@ import org.apache.jmeter.protocol.tcp.sampler.SearchdClientImpl;
 /**
  * Unit test for simple App.
  */
-public class AppTest extends TestCase
+public class SearchdClientImplTest extends TestCase
 {
     /**
      * Create the test case
      *
      * @param testName name of the test case
      */
-    public AppTest( String testName )
+    public SearchdClientImplTest( String testName )
     {
         super( testName );
     }
@@ -37,13 +37,13 @@ public class AppTest extends TestCase
      */
     public static Test suite()
     {
-        return new TestSuite( AppTest.class );
+        return new TestSuite( SearchdClientImplTest.class );
     }
 
     /**
      * Rigourous Test :-)
      */
-    public void testApp() throws IOException, ReadException
+    public void testIfItWorksAtAll() throws IOException, ReadException
     {
         String request = loadFile("request.txt");
         String validReply = loadFile("validReply.txt");
