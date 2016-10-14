@@ -157,6 +157,6 @@ public class SearchdClientImpl extends TCPClientDecorator {
      */
     @Override
     public void setEolByte(int eolInt) {
-        throw new UnsupportedOperationException("Cannot set eomByte for prefixed messages");
+        throw new UnsupportedOperationException("Cannot set eomByte for the searchd protocol adapter");
     }
 }
