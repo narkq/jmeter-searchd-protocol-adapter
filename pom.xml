@@ -14,9 +14,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>org.apache.jmeter</groupId>
-        <artifactId>ApacheJMeter_tcp</artifactId>
-        <version>3.0</version>
+      <groupId>org.apache.jmeter</groupId>
+      <artifactId>ApacheJMeter_tcp</artifactId>
+      <version>3.0</version>
     </dependency>
   </dependencies>
 </project>
