@@ -6,11 +6,11 @@
 
 ## How to use
 
-    1. Copy `target/ApacheJMeter_searchd-1.0.jar` file to `<jmeter folder>/lib/ext/`.
-    2. Create a test plan with a TCP sampler.
-    3. Specify `org.apache.jmeter.protocol.tcp.sampler.SearchdClientImpl` in the "TCPClient classname" field.
-    4. Make sure "Re-use connection" is turned off and "Close connection" is turned on.
-    5. Specify hex-encoded SphinxAPI request payload in "Text to send" field.
+1. Copy `target/ApacheJMeter_searchd-1.0.jar` file to `<jmeter folder>/lib/ext/`.
+2. Create a test plan with a TCP sampler.
+3. Specify `org.apache.jmeter.protocol.tcp.sampler.SearchdClientImpl` in the "TCPClient classname" field.
+4. Make sure "Re-use connection" is turned off and "Close connection" is turned on.
+5. Specify hex-encoded SphinxAPI request payload in "Text to send" field.
 
 Optionally, if you want the response codes to be parsed, set appropriate values for [JMeter properties](http://jmeter.apache.org/usermanual/get-started.html#configuring_jmeter):
 
