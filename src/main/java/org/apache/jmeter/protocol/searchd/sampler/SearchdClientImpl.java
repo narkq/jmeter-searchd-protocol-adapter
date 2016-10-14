@@ -1,5 +1,5 @@
 /*
- * TCP Sampler Client implementation which reads and writes binary data.
+ * SphinxAPI protocol implementation for TCP Sampler Client.
  *
  * Input/Output strings are passed as hex-encoded binary strings.
  *
@@ -18,10 +18,8 @@ import org.apache.jorphan.util.JOrphanUtils;
 import org.apache.log.Logger;
 
 /**
- * Searchd Client implementation.
- * Reads data until the defined EOM byte is reached.
- * If there is no EOM byte defined, then reads until
- * the end of the stream is reached.
+ * SphinxAPI Client implementation.
+ * Reads data acctording to Sphinx binary protocol.
  * The EOM byte is NOT USED.
  *
  * Input data is assumed to be in hex, and is converted to binary
@@ -93,43 +91,54 @@ public class SearchdClientImpl extends TCPClientDecorator {
      * @throws ReadException 
      */
     private String doQuery() throws ReadException {
-        byte[] msg = new byte[0];
         int greetingLen = 4;
         int msgLen = 0;
         int msgLenOffset = 4;
         int headerLen = 8;
         int statusLen = 2;
+        int bytesRead = -1;
+        String requestHeader = "00000001";
         String status = null;
+        String msg = null;
+        byte[] msgBuffer = new byte[0];
         byte[] greetingBuffer = new byte[greetingLen];
         byte[] headerBuffer = new byte[headerLen];
         try {
-            this.tcpClient.write(currentOutputStream, "00000001");
-            if (currentInputStream.read(greetingBuffer, 0, greetingLen) != greetingLen) {
-                String greeting = JOrphanUtils.baToHexString(greetingBuffer);
-                throw new ReadException("", new Error("Could not read greeting, got:"+greeting), greeting);
+            this.tcpClient.write(currentOutputStream, requestHeader);
+            bytesRead = currentInputStream.read(greetingBuffer, 0, greetingLen);
+            String greeting = JOrphanUtils.baToHexString(greetingBuffer);
+            if (log.isDebugEnabled()) {
+                log.debug("Read greeting: " + greeting);
+            }
+            if (bytesRead != greetingLen) {
+                throw new ReadException("", new Error("Could not read greeting"), greeting);
             }
             this.tcpClient.write(currentOutputStream, currentQuery);
-            if (currentInputStream.read(headerBuffer, 0, headerLen) != headerLen) {
-                String header = JOrphanUtils.baToHexString(headerBuffer);
-                throw new ReadException("", new Error("Could not read reply header, got:"+header), header);
+            bytesRead = currentInputStream.read(headerBuffer, 0, headerLen);
+            String header = JOrphanUtils.baToHexString(headerBuffer);
+            if (log.isDebugEnabled()) {
+                log.debug("Read header: " + header);
+            }
+            if (bytesRead != headerLen) {
+                throw new ReadException("", new Error("Could not read reply header"), header);
             } else {
                 status = JOrphanUtils.baToHexString(Arrays.copyOfRange(headerBuffer, 0, statusLen));
                 msgLen = byteArrayToInt(Arrays.copyOfRange(headerBuffer, msgLenOffset, headerLen));
-                msg = new byte[msgLen];
-                int bytes = JOrphanUtils.read(currentInputStream, msg, 0, msgLen);
-                if (bytes < msgLen) {
-                    log.warn("Incomplete message read, expected: "+msgLen+" got: "+bytes);
+                msgBuffer = new byte[msgLen];
+                bytesRead = JOrphanUtils.read(currentInputStream, msgBuffer, 0, msgLen);
+                msg = JOrphanUtils.baToHexString(msgBuffer);
+                if (bytesRead < msgLen) {
+                    throw new ReadException("", new Error("Incomplete message read, expected " + msgLen + " bytes, got " + bytesRead + " bytes"), msg);
                 }
             }
     
-            String buffer = JOrphanUtils.baToHexString(msg);
-            if(log.isDebugEnabled()) {
-                log.debug("Read: status " + status + ", length " + msgLen + "\n" + buffer);
+            if (log.isDebugEnabled()) {
+                log.debug("Read reply message: status " + status + ", length " + msgLen);
             }
-            return STATUS_PREFIX + status + STATUS_SUFFIX + buffer;
+            return STATUS_PREFIX + status + STATUS_SUFFIX + msg;
         } 
         catch(IOException e) {
-            throw new ReadException("", e, JOrphanUtils.baToHexString(msg));
+            throw new ReadException("", e, JOrphanUtils.baToHexString(msgBuffer));
         }
     }
 
